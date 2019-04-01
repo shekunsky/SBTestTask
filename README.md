@@ -40,8 +40,8 @@ Unit tests placed in **<SBTestTaskTests.swift>** file
 
 
 ## Installing
-For open project you need Xcode version 10 or higher. 
+For open project you need Xcode version 10.2 or higher. 
 1. Open **<SBTestTask.xcodeproj>** file in Xcode.
 2. At the SBTestTask target general settings page set your development team.
-3. Select device (or simulator) on which you want to instal the App.
+3. Select device (or simulator) on which you want to install the App.
 4. Build and Run.
