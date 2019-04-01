@@ -10,25 +10,52 @@ import XCTest
 @testable import SBTestTask
 
 class SBTestTaskTests: XCTestCase {
-
-    override func setUp() {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    
+    var sut = GifSearchController()
+    
+    func testAPIWorking() {
+        let expectation = self.expectation(description: "APIWorking")
+        SwiftyGiphyAPI.shared.getSearch(searchTerm: "cat",
+                                        limit: FetchGifsConstants.pageSize,
+                                        rating: .pg13,
+                                        offset: 0) {(error, response) in
+            expectation.fulfill()
+        }
+        self.waitForExpectations(timeout: TestsConstants.timeLimitForResponse)
     }
-
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    
+    func testResponsePagination() {
+        SwiftyGiphyAPI.shared.getSearch(searchTerm: "cat",
+                                        limit:TestsConstants.pageLimit,
+                                        rating: .pg13,
+                                        offset: 0) {(error, response) in
+            XCTAssertEqual(TestsConstants.pageLimit, response?.gifs.count)
         }
     }
-
+    
+    func testAPIForEmptyResponse() {
+        SwiftyGiphyAPI.shared.getSearch(searchTerm: TestsConstants.requestForEmptyResponse,
+                                        limit: TestsConstants.pageLimit,
+                                        rating: .pg13,
+                                        offset: 0) {(error, response) in
+            XCTAssertEqual(0, response?.gifs.count)
+            XCTAssertEqual(nil, error)
+        }
+    }
+    
+    func testEmptyResponseResult() {
+        let sut = self.sut
+        let expectation = self.expectation(description: "APIEmptyResponseResult")
+        sut.bindViewModel()
+        sut.viewModel.searchText = TestsConstants.requestForEmptyResponse
+        sut.errorLabel.isHidden = true
+        sut.errorLabel.text = ""
+        sut.viewModel.fetchNextSearchPage(false)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            XCTAssertEqual(sut.errorLabel.text, NSLocalizedString(TextConstants.kNoGifsMatch, comment: "No GIFs match this search."))
+            XCTAssertEqual(sut.errorLabel.isHidden, false)
+            expectation.fulfill()
+        }
+        self.waitForExpectations(timeout: TestsConstants.timeLimitForResponse)
+    }
 }
