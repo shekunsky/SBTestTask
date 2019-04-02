@@ -44,10 +44,14 @@ class SelectedGifVC: UIViewController {
     }
     
     private func prepareShareData() {
+        shareButton.isEnabled = false
         DispatchQueue.global(qos: .default).async {
             let shareURL: NSURL = self.imageSet!.url! as NSURL
             let shareData: NSData = NSData(contentsOf: shareURL as URL)!
             self.gifDataForSharing = [shareData as Any]
+            DispatchQueue.main.async {
+                self.shareButton.isEnabled = true
+            }
         }
     }
     
